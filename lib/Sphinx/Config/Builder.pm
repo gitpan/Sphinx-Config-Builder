@@ -3,7 +3,7 @@ package Sphinx::Config::Builder;
 use strict;
 use warnings;
 
-our $VERSION = '1.01';
+our $VERSION = '1.02';
 
 sub new {
     my $pkg  = shift;
@@ -85,12 +85,12 @@ sub new {
     return $self;
 }
 
-sub push {
+sub kv_push {
     my $self = shift;
     return push @{ $self->{kv_pairs} }, @_;
 }
 
-sub pop {
+sub kv_pop {
     my $self = shift;
     return pop @{ $self->{kv_pairs} };
 }
@@ -207,7 +207,7 @@ on the fly, using a backend datasource to drive the indexes, sources, and their 
 
 =head1 VERSION
 
-This module is being released as version 1.01.
+This module is being released as version 1.02.
 
 =head1 SYNOPSIS
 
@@ -228,7 +228,7 @@ This module is being released as version 1.01.
 		my $index       = Sphinx::Config::Entry::Index->new();
 	
 		$src->name($source_name);
-		$src->push(
+		$src->kv_push(
 		    { type            => q{xmlpipe} },
 		    { xmlpipe_command => qq{/bin/cat $XMLPATH/$xmlfile} },
 		);
@@ -236,7 +236,7 @@ This module is being released as version 1.01.
 		$builder->push_source($src);
 	
 		$index->name($index_name);
-		$index->push(
+		$index->kv_push(
 		    { source       => qq{$source_name} },
 		    { path         => qq{$INDEXPATH/$document_set} },
 		    { charset_type => q{utf-8} },
@@ -245,8 +245,8 @@ This module is being released as version 1.01.
 		$builder->push_index($index);
 	    }
 	}
-	$builder->indexer->push( { mem_limit => q{64m} } );
-	$builder->searchd->push(
+	$builder->indexer->kv_push( { mem_limit => q{64m} } );
+	$builder->searchd->kv_push(
 	    { compat_sphinxql_magics => 0 },
 	    { listen                 => q{192.168.0.41:9312} },
 	    { listen                 => q{192.168.0.41:9306:mysql41} },
@@ -310,13 +310,96 @@ file that may be printed to STDOUT for the C<indexer> to consume using the C<--c
 
 =head1 SUBROUTINES/METHODS
 
+=head2 C<Sphinx::Config::Builder> 
+
+=head3 C<new>
+
+Highest level constructor.
+
+=head3 C<push_index>
+
+Push a reference of Sphinx::Config::Entry::Index into builder. 
+
+=head3 C<pop_index>
+
+Pop a reference of Sphinx::Config::Entry::Index into builder. 
+
+=head3 C<push_source>
+
+Push a reference of Sphinx::Config::Entry::Source into builder. 
+
+=head3 C<pop_source>
+
+Pop a reference of Sphinx::Config::Entry::Source into builder. 
+
+=head3 C<index_list>
+
+Get container list of all Index references.
+
+=head3 C<source_list>
+
+Get container list of all Source references.
+
+=head3 C<indexer>
+
+Get Sphinx::Config::Entry::Indexer member reference.
+
+=head3 C<sourced>
+
+Get Sphinx::Config::Entry::Searchd member reference.
+
+=head3 C<as_string>
+
+Calls C<as_string> method for all members of the builder object, which results in the entire
+configuration file.
+
+=head2 C<Sphinx::Config::Entry::Index> and C<Sphinx::Config::Entry::Source> 
+
+=head3 C<new> 
+
+Constructor.
+
+=head3 C<kv_push> 
+
+Push key/value HASH ref into Index, Source list.
+
+=head3 C<kv_pop> 
+
+Pop key/value HASH ref from Index, Source list.
+
+=head3 C<as_string>
+
+Return string reprentation of Index, Source.
+
+=head3 C<name> 
+
+Set name of Index, Source.
+
+=head2 C<Sphinx::Config::Entry::Indexer> and C<Sphinx::Config::Entry::Searchd>  
+
+=head3 C<new> 
+
+Constructor.
+
+=head3 C<kv_push> 
+
+Push key/value HASH ref into Indexer, Searchd.
+
+=head3 C<kv_pop> 
+
+Pop key/value HASH ref from Indexer, Searchd.
+
+=head3 C<as_string>
+
+Return string representation of Indexer, Searchd.
+
 =head1 DEPENDENCIES
 
 None.
 
 =head1 DIAGNOSTICS
 
-None.
+There is no validation, garbage in, garbage out.
 
 =head1 CONFIGURATION AND ENVIRONMENT
 
